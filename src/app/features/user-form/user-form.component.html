@@ -1,0 +1,60 @@
+<div class="user-form" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
+  <h2 id="user-form-title" class="user-form__title">Add user</h2>
+  <p class="user-form__hint">All fields are required. Email must be unique.</p>
+
+  <form class="user-form__fields" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="field">
+      <span class="field__label">Name</span>
+      <input
+        class="field__control"
+        type="text"
+        formControlName="name"
+        name="user-name"
+        autocomplete="name"
+        maxlength="120"
+      />
+      <span class="field__error" *ngIf="form.controls['name'].touched && form.controls['name'].hasError('required')">
+        Name is required.
+      </span>
+      <span class="field__error" *ngIf="form.controls['name'].touched && form.controls['name'].hasError('maxlength')">
+        Name is too long.
+      </span>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Email</span>
+      <input
+        class="field__control"
+        type="email"
+        formControlName="email"
+        name="user-email"
+        autocomplete="email"
+      />
+      <span class="field__error" *ngIf="form.controls['email'].touched && form.controls['email'].hasError('required')">
+        Email is required.
+      </span>
+      <span class="field__error" *ngIf="form.controls['email'].touched && form.controls['email'].hasError('email')">
+        Enter a valid email address.
+      </span>
+      <span class="field__error" *ngIf="form.controls['email'].touched && form.controls['email'].hasError('duplicate')">
+        This email is already registered.
+      </span>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Role</span>
+      <select class="field__control" formControlName="role" name="user-role">
+        <option value="" disabled>Select a role</option>
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+      <span class="field__error" *ngIf="form.controls['role'].touched && form.controls['role'].hasError('required')">
+        Role is required.
+      </span>
+    </label>
+
+    <div class="user-form__actions">
+      <button type="button" class="btn btn--ghost" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn btn--primary">Save user</button>
+    </div>
+  </form>
+</div>

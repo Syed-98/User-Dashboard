@@ -1,0 +1,137 @@
+<div class="dashboard">
+  <header class="dashboard__header">
+    <div>
+      <h1 class="dashboard__title">User dashboard</h1>
+      <p class="dashboard__subtitle">Live role distribution and directory</p>
+    </div>
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="openAddUser()"
+      [disabled]="formModuleLoading() || modalOpen()"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="modalOpen()"
+    >
+      <span *ngIf="!formModuleLoading(); else loadingLabel">Add user</span>
+      <ng-template #loadingLabel>Opening…</ng-template>
+    </button>
+  </header>
+
+  <section class="dashboard__grid">
+    <article class="panel panel--table" aria-labelledby="users-table-title">
+      <div class="panel__header">
+        <h2 id="users-table-title" class="panel__title">Directory</h2>
+        <div class="panel__tools">
+          <label class="sr-only" for="user-filter">Filter users</label>
+          <input
+            id="user-filter"
+            class="input"
+            type="search"
+            placeholder="Filter by name, email, or role"
+            [value]="(filter$ | async) ?? ''"
+            (input)="onFilterInput($any($event.target).value)"
+          />
+          <label class="page-size" for="page-size">
+            Rows
+            <select
+              id="page-size"
+              class="input input--select"
+              [value]="(pageSize$ | async) ?? 5"
+              (change)="onPageSizeChange($any($event.target).value)"
+            >
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <ng-container *ngIf="pagedUsers$ | async as page">
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="sr-only">
+              Users, page {{ page.pageIndex + 1 }} of {{ page.pageCount }}, {{ page.total }} total matches
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of page.items; trackBy: trackByUserId">
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="pill" [attr.data-role]="user.role">{{ user.role }}</span>
+                </td>
+              </tr>
+              <tr *ngIf="page.items.length === 0">
+                <td colspan="3" class="empty">No users match this filter.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination" *ngIf="page.total > 0">
+          <span class="pagination__meta">
+            Showing {{ page.items.length ? page.pageIndex * page.pageSize + 1 : 0 }}–{{
+              page.pageIndex * page.pageSize + page.items.length
+            }}
+            of {{ page.total }}
+          </span>
+          <div class="pagination__controls">
+            <button
+              type="button"
+              class="btn btn--ghost btn--compact"
+              (click)="goToPreviousPage()"
+              [disabled]="page.pageIndex === 0"
+            >
+              Previous
+            </button>
+            <span class="pagination__page">Page {{ page.pageIndex + 1 }} / {{ page.pageCount }}</span>
+            <button
+              type="button"
+              class="btn btn--ghost btn--compact"
+              (click)="goToNextPage()"
+              [disabled]="page.pageIndex >= page.pageCount - 1"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </article>
+
+    <article class="panel panel--chart" aria-labelledby="role-chart-title">
+      <div class="panel__header">
+        <h2 id="role-chart-title" class="panel__title">Role distribution</h2>
+        <span class="badge" *ngIf="roleDistribution$ | async as dist">
+          {{ dist.counts[0] + dist.counts[1] + dist.counts[2] }} users
+        </span>
+      </div>
+      <div class="chart-shell">
+        <div class="chart-shell__canvas" [class.chart-shell__canvas--hidden]="chartLoading()">
+          <canvas #roleChart role="img" aria-label="Pie chart of user roles"></canvas>
+        </div>
+        <div class="chart-shell__loading" *ngIf="chartLoading()" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <span>Loading chart…</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</div>
+
+<div
+  class="modal"
+  *ngIf="modalOpen()"
+  (click)="closeModal()"
+  role="presentation"
+>
+  <div class="modal__dialog" (click)="$event.stopPropagation()" role="document">
+    <ng-container #modalHost></ng-container>
+  </div>
+</div>
