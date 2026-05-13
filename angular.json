@@ -54,6 +54,9 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "github-pages": {
+              "baseHref": "/User-Dashboard/"
             }
           },
           "defaultConfiguration": "production"
